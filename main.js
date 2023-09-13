@@ -1,12 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose')
-
+const mongoose = require('mongoose');
 
 const app = express();
 
-const user = require('./routes/user')
+const user = require('./routes/user');
+const vehicle = require('./routes/vehicle');
 const authMiddleware = require('./auth-middleware');
+
 const port = process.env.PORT || 8080;
 
 //setup
@@ -22,23 +23,23 @@ app.get('/health', (req,res)=>{
 })
 app.use('/auth', user) 
 
-// app.use('/api', authMiddleware)
-app.use('/api', function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization']
-    const token = authHeader && authHeader.split(' ')[1]
+app.use('/api', authMiddleware, vehicle)
+// app.use('/api', function authenticateToken(req, res, next) {
+//     const authHeader = req.headers['authorization']
+//     const token = authHeader && authHeader.split(' ')[1]
 
-    if (token == null) return res.sendStatus(401)
+//     if (token == null) return res.sendStatus(401)
 
-    jwt.verify(token, SECRET, (err, user) => {
-        console.log(err)
+//     jwt.verify(token, SECRET, (err, user) => {
+//         console.log(err)
 
-        if (err) return res.sendStatus(403)
+//         if (err) return res.sendStatus(403)
 
-        req.user = user 
+//         req.user = user 
 
-        next()
-    })
-}, (req, res) => res.json({ 'Ok': 'Ok', ...req.user }))
+//         next()
+//     })
+// }, (req, res) => res.json({ 'Ok': 'Ok', ...req.user }))
 
 
 const start = async ()=> {

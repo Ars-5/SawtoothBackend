@@ -3,12 +3,13 @@ const secp256k1 = require('secp256k1')
 
 const axios = require('axios').default;
 
-const { Secp256k1PrivateKey } = require('sawtooth-sdk-js/signing/secp256k1')
-const { CryptoFactory,  createContext } = require('sawtooth-sdk-js/signing')
-const protobuf = require('sawtooth-sdk-js/protobuf')
+const { Secp256k1PrivateKey }  = require('sawtooth-sdk-js/signing/secp256k1');
+const { CryptoFactory, createContext }  =require('sawtooth-sdk-js/signing')
+const protobuf = require('sawtooth-sdk-js/protobuf');
+const { family, actions } = require('./constants');
 
 
-//esto crea una nueva llave privada, y retorna su version hex
+// This create a new private key and returns hex version of the key
 const createPrivateKey = () => {
     const msg = randomBytes(32)
     let privKey
@@ -21,31 +22,34 @@ const createPrivateKey = () => {
     return privKey.toString('hex')
 }
 
-const privayeKeyHexStr = createPrivateKey()
+const privateKeyHexStr = createPrivateKey();
 
-//creando la instancia de la llave privada en una clase interna
-const privateKey = new Secp256k1PrivateKey(Buffer.from(privayeKeyHexStr, 'hex'));
+// Se crea instancia para la llave privada
+const privateKey = new Secp256k1PrivateKey(Buffer.from(privateKeyHexStr, 'hex'));
 
-const context = createContext('secp256k1')
+const context = createContext('secp256k1');
 
-//Creando el signer para firmar en el playload
-const signer = new CryptoFactory(context).newSigner(privateKey)
-
-
-//preparando al payload
-const payload = "Testeando ando"
-const payloadBytes = Buffer.from(payload)
+// Se crear el firmador
+const signer = new CryptoFactory(context).newSigner(privateKey);
 
 
+// Preparo payload
+const payload = JSON.stringify({
+    id: 'Javier Lujan qweqweqwe',
+    action: actions.register_vehicle,
+});
+const payloadBytes = Buffer.from(payload);
 
-// el flujo seria: Payload -> Transaction -> TransactionList -> Batch -> BatchList -> Byte -> Rest_API
-//preparando el header de transation
+
+// Payload -> Transaction -> TransactionList -> Batch -> BatchList -> Byte -> REST_API
+// Prepare Transaction Header
+
 
 const transactionHeaderBytes = protobuf.TransactionHeader.encode({
-    familyName: 'intkey',
-    familyVersion: '1.0',
-    inputs: ['lcf126'],
-    outputs: ['lcf126'],
+    familyName: family.name,
+    familyVersion: family.version,
+    inputs: [family.namespace],
+    outputs: [family.namespace],
     signerPublicKey: signer.getPublicKey().asHex(),
     nonce: `${Math.random()}`,
     batcherPublicKey: signer.getPublicKey().asHex(),
@@ -54,7 +58,7 @@ const transactionHeaderBytes = protobuf.TransactionHeader.encode({
 }).finish()
 
 const transaction = protobuf.Transaction.create({
-    header: transactionHeaderBytes,
+    header: transactionHeaderBytes, 
     headerSignature: signer.sign(transactionHeaderBytes),
     payload: payloadBytes
 })
@@ -64,29 +68,26 @@ const transactions = [transaction];
 const batchHeaderBytes = protobuf.BatchHeader.encode({
     signerPublicKey: signer.getPublicKey().asHex(),
     transactionIds: transactions.map(t => t.headerSignature)
-}).finish()
+}).finish();
 
 const batch = protobuf.Batch.create({
-    header: batchHeaderBytes,
+    header: batchHeaderBytes, 
     headerSignature: signer.sign(batchHeaderBytes),
     transactions: transactions
 })
-const batches = [batch];
+const batches  = [batch];
 const batchListBytes = protobuf.BatchList.encode({
     batches: batches
 }).finish();
 
-//console.log(batchListBytes.toString())
-
-//forward
+// Forward
 
 axios.post('http://localhost:8008/batches', batchListBytes, {
     headers: {
         'Content-Type': 'application/octet-stream'
     },
-    data: batchListBytes
-}).then((res)=> {
+} ).then((res)=> {
     console.log(res.data);
 }).catch((err)=>{
-    console.log(err.response)
+    console.log(err)
 })
