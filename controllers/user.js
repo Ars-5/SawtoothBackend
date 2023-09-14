@@ -12,9 +12,9 @@ exports.loginUser = async (req, res) => {
         // TODO meaningful error insight
         return res.json(valid.error.details).status(400);
     }
-    const { username, password } = valid.value
+    const { mail, password } = valid.value
     const user = await User.findOne({
-        username,
+        mail,
         password,
     })
     if (!user) {
@@ -24,7 +24,7 @@ exports.loginUser = async (req, res) => {
     }
     const { publicKey } = user;
     const token = jwt.sign({
-        username,
+        mail,
         publicKey
     }, SECRET, {
         expiresIn: '1800s'
@@ -39,11 +39,10 @@ exports.loginUser = async (req, res) => {
 exports.registerUser = async (req, res) => {
     const valid = registerUserSchema.validate(req.body);
     if (valid.error) {
-        // TODO meaningful error insight
         return res.json(valid.error.details).status(400);
     }
     const user = await User.findOne({
-        username: req.body.username
+        mail: req.body.mail
     })
     if (user) {
         return res.status(409).json({
@@ -51,18 +50,23 @@ exports.registerUser = async (req, res) => {
         })
     }
     const { privateKey, publicKey } = createPrivateKey();
-    const { username, name, password } = valid.value;
+    const { mail, name, lastname, dni, phone, password } = valid.value;
     await User.create({
-        username,
+        mail,
         name,
+        lastname,
+        dni,
+        phone,
         password,
         privateKey,
-        publicKey
+        publicKey,
     })
     res.json({
+        mail,
         name,
-        username,
-        password,
+        lastname,
+        dni,
+        phone,
         publicKey,
     })
 }
@@ -74,9 +78,9 @@ exports.listUsers = (req, res) => {
 
 exports.getUserByUsername = async (req, res) => {
     try {
-      const { username } = req.params;
+      const { mail } = req.params;
       // Buscar al usuario por su nombre de usuario en la base de datos
-      const user = await User.findOne({ username });
+      const user = await User.findOne({ mail });
   
       if (!user) {
         // Si el usuario no se encuentra, devolver un error 404 (No encontrado)
@@ -86,7 +90,7 @@ exports.getUserByUsername = async (req, res) => {
       // Devolver los componentes del usuario en la respuesta
       const { name, password, privateKey, publicKey } = user;
       return res.json({
-        username,
+        mail,
         name,
         password,
         privateKey,
