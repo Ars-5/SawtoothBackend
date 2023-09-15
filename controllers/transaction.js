@@ -17,3 +17,4 @@ exports.registerVehicle = (req, res) => {
         res.status(400).json(err && err.response ? err.response.data : err.message);
     })
 }
+

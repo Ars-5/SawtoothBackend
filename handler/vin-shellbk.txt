@@ -26,7 +26,7 @@ class VinSellHandler extends TransactionHandler {
         const address = family.namespace + hash(payload.id).slice(-64);
         const data = await context.getState([address]);
         if (data && data[address] && data[address].length !== 0) {
-          throw new InvalidTransaction("Ya existe el identificador");
+          throw new InvalidTransaction("Existing car found with this VIN");
         }
         return context
           .setState({
@@ -37,6 +37,29 @@ class VinSellHandler extends TransactionHandler {
               throw new InvalidTransaction("State Error!. Nothing got updated");
             }
           });
+      break;
+
+
+
+      case actions.register_user:
+        const { name, lastname, dni, faculty, modality, owner } = payload;
+        const userAddress = family.namespace + hash(owner).slice(-64); 
+        // Dirección basada en el propietario
+        const user = {
+          name,
+          lastname,
+          dni,
+          faculty,
+          modality,
+          owner,
+        };
+
+        // Guardar los datos del usuario en el estado de la cadena de bloques
+        await context.setState({
+          [userAddress]: Buffer.from(JSON.stringify(user)),
+        });
+
+        break;
       default:
         throw new InvalidTransaction("Invalid Action Type");
     }

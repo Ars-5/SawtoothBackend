@@ -71,15 +71,10 @@ exports.registerUser = async (req, res) => {
     })
 }
 
-exports.listUsers = (req, res) => {
-    const userList = Object.keys(users);
-    res.json(userList);
-};
-
-exports.getUserByUsername = async (req, res) => {
+exports.getUserByMail = async (req, res) => {
     try {
-      const { mail } = req.params;
-      // Buscar al usuario por su nombre de usuario en la base de datos
+      const { mail } = req.body; // Lee el valor del correo electrónico desde el cuerpo de la solicitud
+      // Buscar al usuario por su correo de usuario en la base de datos
       const user = await User.findOne({ mail });
   
       if (!user) {

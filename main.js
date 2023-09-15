@@ -6,6 +6,7 @@ const app = express();
 
 const user = require('./routes/user');
 const vehicle = require('./routes/vehicle');
+const user_block = require('./routes/user_block');
 const authMiddleware = require('./auth-middleware');
 
 const port = process.env.PORT || 8080;
@@ -23,7 +24,9 @@ app.get('/health', (req,res)=>{
 })
 app.use('/auth', user) 
 
-app.use('/api', authMiddleware, vehicle)
+app.use('/api', authMiddleware, vehicle, user_block)
+
+
 // app.use('/api', function authenticateToken(req, res, next) {
 //     const authHeader = req.headers['authorization']
 //     const token = authHeader && authHeader.split(' ')[1]
