@@ -10,7 +10,6 @@ const userSchema = new Schema({
     password: String,
     privateKey: String,
     publicKey: String,
-
     faculty: String,
     modality: String,
 });

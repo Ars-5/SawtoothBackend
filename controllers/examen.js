@@ -15,11 +15,8 @@ exports.registerExam = async (req, res) => {
     return res.status(409).json({
       message: "Usuario ya dio examen",
     });
-  } else if (!exam) {
-    return res.status(404).json({
-      message: "Usuario no encontrado",
-    });
-  }
+  } 
+  
   const { dni, name, lastname, date, p1, p2, p3, p4, p5 } = valid.value;
   await Examen.create({
     dni,name,lastname,date,p1,p2,p3,p4,p5,
