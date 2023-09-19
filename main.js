@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const app = express();
 
 const user = require('./routes/user');
+const sistema = require('./routes/sistema');
 const vehicle = require('./routes/vehicle');
 const user_block = require('./routes/user_block');
 const authMiddleware = require('./auth-middleware');
@@ -23,6 +24,7 @@ app.get('/health', (req,res)=>{
     })
 })
 app.use('/auth', user) 
+app.use('/sis', sistema) 
 
 app.use('/api', authMiddleware, vehicle, user_block)
 
