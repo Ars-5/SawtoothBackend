@@ -1,7 +1,5 @@
-const { SECRET } = require("../config");
 const registerExamSchema = require("../validations/register-exam");
 const Examen = require("../schemas/examen");
-const User = require("../schemas/user");
 
 exports.registerExam = async (req, res) => {
   const valid = registerExamSchema.validate(req.body);
